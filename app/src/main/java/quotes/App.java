@@ -6,21 +6,64 @@ package quotes;
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
 
-import java.io.Reader;
+import java.io.*;
 import java.lang.reflect.Type;
+import java.net.HttpURLConnection;
+import java.net.URL;
 import java.nio.file.*;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 public class App {
 
-    public static void main(String[] args) {
-    getData();
-
+    public static void main(String[] args) throws IOException {
+//    getJsonData();
+    getApiData();
 
 
     }
-    public static Object getData() {
+    public static void getApiData() throws IOException {
+
+        String url = "http://api.forismatic.com/api/1.0/?method=getQuote&format=json&lang=en";
+        HttpURLConnection connection = (HttpURLConnection) new URL(url).openConnection();
+
+        connection.setConnectTimeout(5000);
+        connection.setReadTimeout(5000);
+
+        connection.setRequestMethod("GET");
+        int responseCode = connection.getResponseCode();
+        System.out.println(responseCode);
+
+        if
+        (responseCode == HttpURLConnection.HTTP_OK){
+
+
+
+            InputStreamReader inputStreamReader = new InputStreamReader(connection.getInputStream());
+            BufferedReader bufferedReader = new BufferedReader(inputStreamReader);
+
+            String data = bufferedReader.readLine();
+//            System.out.println(data);
+
+            bufferedReader.close();
+
+            Gson gson = new Gson();
+            Quotes quotes = gson.fromJson(data, Quotes.class);
+
+            String jsonOutput = gson.toJson(quotes);
+            System.out.println(jsonOutput);
+            System.out.println("Author : " + quotes.getAuthor());
+            System.out.println("Text : " + quotes.getText());
+
+
+            FileWriter infoFileWriter = new FileWriter("C:/Users/adraf/ASAC/401/quotes/app/src/main/resources/recentquotes.json", false);
+            gson.toJson(jsonOutput, infoFileWriter);
+            infoFileWriter.close();
+
+        }
+    }
+    public static Object getJsonData() {
         Object txt = null;
         try {
             // create Gson instance
